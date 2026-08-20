@@ -714,6 +714,29 @@ function ParticleField({ theme, reducedMotion }) {
 
 /* ============================== BOOT / LOGIN ============================== */
 
+/* ============================== AVATAR ============================== */
+
+const AVATAR_SRC = "/avatar.jpg";
+
+function Avatar({ initial, rounded = "rounded-full", className = "" }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div className={`w-full h-full flex items-center justify-center font-mono font-bold ${className}`}>
+        {initial}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={AVATAR_SRC}
+      onError={() => setFailed(true)}
+      alt="Avatar"
+      className={`w-full h-full object-cover ${rounded}`}
+    />
+  );
+}
+
 function BootScreen({ onDone }) {
   const { t } = useLang();
   const [pct, setPct] = useState(0);
@@ -734,10 +757,10 @@ function BootScreen({ onDone }) {
   return (
     <div className="fixed inset-0 bg-[#05070c] flex flex-col items-center justify-center gap-8 z-[100]">
       <div className="relative w-16 h-16">
-        <div className="absolute inset-0 rounded-2xl border-2 border-[#5eead4]/25" />
-        <div className="absolute inset-0 rounded-2xl border-t-2 border-[#5eead4] animate-spin [animation-duration:1.1s]" />
-        <div className="absolute inset-[6px] rounded-xl bg-gradient-to-br from-[#5eead4]/20 to-[#a78bfa]/20 flex items-center justify-center">
-          <span className="text-[#5eead4] font-mono text-lg font-bold">H</span>
+        <div className="absolute inset-0 rounded-full border-2 border-[#5eead4]/20" />
+        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#5eead4] animate-spin [animation-duration:1.1s]" />
+        <div className="absolute inset-[6px] rounded-full overflow-hidden bg-gradient-to-br from-[#5eead4]/20 to-[#a78bfa]/20 flex items-center justify-center">
+          <Avatar initial="H" className="text-[#5eead4] text-lg" />
         </div>
       </div>
       <div className="w-52 h-[3px] rounded-full bg-white/10 overflow-hidden">
@@ -796,8 +819,8 @@ function LoginScreen({ onDone }) {
       </div>
 
       <div className="relative z-10 flex flex-col items-center gap-5">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#5eead4]/25 to-[#a78bfa]/25 border border-white/10 flex items-center justify-center text-2xl font-mono text-[#5eead4] shadow-[0_0_40px_rgba(94,234,212,0.15)]">
-          H
+        <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#5eead4]/25 to-[#a78bfa]/25 border border-white/10 flex items-center justify-center shadow-[0_0_40px_rgba(94,234,212,0.15)]">
+          <Avatar initial="H" className="text-2xl text-[#5eead4]" />
         </div>
         <div className="flex flex-col items-center gap-1">
           <div className="font-mono text-lg text-white/90 h-7">
@@ -1613,10 +1636,10 @@ function AboutApp() {
     <div className="h-full overflow-auto p-6" style={{ color: "var(--text)" }}>
       <div className="flex items-center gap-4 mb-5">
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-mono font-bold"
+          className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center text-xl"
           style={{ background: "var(--accentSoft)", color: "var(--accent)" }}
         >
-          {bio.name[0]}
+          <Avatar initial={bio.name[0]} rounded="rounded-2xl" className="text-xl" />
         </div>
         <div>
           <div className="text-lg font-semibold">{bio.name}</div>
