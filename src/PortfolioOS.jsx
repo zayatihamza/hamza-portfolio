@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from "react";
 import {
   Folder, FolderOpen, TerminalSquare, User, Wrench, Mail, FileText,
   Settings as SettingsIcon, X, Minus, Square, Maximize2, Wifi, Activity,
   RefreshCw, FilePlus, FileImage, FileJson, FileCode2, ChevronRight,
   Code2 as GithubIcon, Link2 as LinkedinIcon, Send, Download, Sun, Moon, Palette, Server,
   ShieldCheck, GitBranch, Boxes, Cpu, Network, Database, Layers,
-  ExternalLink, Home, ArrowLeft, Check, Circle
+  ExternalLink, Home, ArrowLeft, Check, Circle, Languages
 } from "lucide-react";
 
 /* ============================== THEME ============================== */
@@ -76,192 +76,510 @@ const WALLPAPERS = [
 
 /* ============================== CONTENT DATA ============================== */
 
-const PROJECTS = [
-  {
-    slug: "OKD-PaaS-Platform",
-    name: "OKD-PaaS-Platform",
-    summary: "Self-hosted OpenShift (OKD) cluster on vSphere",
-    files: {
-      "README.md": `# OKD PaaS Platform
+const BIO_CONTACT = {
+  name: "Hamza Zayati",
+  email: "zayatihamza@gmail.com",
+  phone: "+216 29 69 96 60",
+  linkedin: "https://www.linkedin.com/in/hamza-zayeti-/",
+  github: "https://github.com/zayatihamza",
+};
 
-A production-style self-hosted Kubernetes platform built on OKD (community
-OpenShift), running on a 3-node vSphere cluster with master/worker co-located
-roles.
+const PROJECT_DATA = [
+  {
+    slug: "Cloud-PaaS-DevSecOps",
+    summary: {
+      en: "OpenShift PaaS platform with GitOps & DevSecOps hardening (Final-year project)",
+      fr: "Plateforme PaaS OpenShift avec GitOps et durcissement DevSecOps (Projet de fin d'études)",
+    },
+    readme: {
+      en: `# Cloud PaaS / DevSecOps Platform
+
+Final-year engineering project (3S Standard Sharing Software, Feb - Jul 2026):
+design and deployment of a DevSecOps PaaS platform built on OpenShift.
 
 ## Highlights
-- Bare-metal-style install on vSphere, 3 control-plane nodes doubling as workers
-- etcd quorum recovery runbook after infra incidents (NTP/clock-skew drift)
-- CRI-O sandbox + kube-api-access volume troubleshooting at the node level
-- SSH-proxied node access via bastion / admin VM
-- GitOps-managed cluster add-ons (see Tekton-CICD, Kyverno-GitOps)
+- Automated integration, validation and deployment of microservices with
+  Tekton CI/CD pipelines
+- GitOps delivery via ArgoCD to sync and deploy microservices onto the cluster
+- Platform hardening with RBAC, SCC, NetworkPolicies, Kyverno and OpenBao
+- Full observability stack: Prometheus, Grafana, Jaeger and ELK
 
 ## Stack
-OKD 4.x - CRI-O - etcd - OVN-Kubernetes - Helm - vSphere CSI
+OpenShift - Tekton - ArgoCD - Kyverno - OpenBao - Prometheus - Grafana - Jaeger - ELK
 
 ## Status
-Actively maintained homelab-grade production platform.`,
-      "architecture-diagram.png": "diagram:okd",
-      "demo-link.txt": "https://example.com/demos/okd-paas-platform",
-      "tech-stack.json": JSON.stringify(
-        {
-          platform: "OKD 4.x",
-          hypervisor: "VMware vSphere",
-          nodes: { control_plane: 3, workers: "co-located on control-plane" },
-          networking: "OVN-Kubernetes",
-          runtime: "CRI-O",
-          storage: "vSphere CSI",
-          access: "SSH bastion (admin VM)",
-        },
-        null,
-        2
-      ),
-    },
-  },
-  {
-    slug: "Kyverno-Policy-GitOps",
-    name: "Kyverno-Policy-GitOps",
-    summary: "Policy-as-code security hardening via GitOps",
-    files: {
-      "README.md": `# Kyverno Policy-as-Code (GitOps)
+Delivered as a final-year engineering project (PFE), ESPRIT.`,
+      fr: `# Plateforme Cloud PaaS / DevSecOps
 
-ClusterPolicy library for OKD security hardening, version-controlled and
-rolled out through a GitOps repository.
+Projet de fin d'études (3S Standard Sharing Software, Fév - Juil 2026) :
+conception et déploiement d'une plateforme PaaS DevSecOps basée sur OpenShift.
 
-## Policy domains
-- Pod security standards (restricted profile enforcement)
-- Registry allow-listing / image provenance
-- Mandatory resource labeling for cost & ownership tracking
-- Secrets hygiene (block plaintext secrets in manifests)
-
-## Notable incident
-Diagnosed and resolved admission/cleanup controller crash-looping caused by
-leader-election lease renewal failures - traced through etcd latency and
-clock skew before isolating the root cause to a missing kube-api-access
-projected volume linked to a corrupted CRI-O sandbox on a master node.
+## Points clés
+- Automatisation de l'intégration, de la validation et du déploiement de
+  microservices via des pipelines Tekton CI/CD
+- Livraison GitOps avec ArgoCD pour synchroniser et déployer les microservices
+  sur le cluster
+- Durcissement de la plateforme avec RBAC, SCC, NetworkPolicies, Kyverno et OpenBao
+- Stack d'observabilité complète : Prometheus, Grafana, Jaeger et ELK
 
 ## Stack
-Kyverno - ArgoCD-style GitOps repo - OKD - YAML ClusterPolicies`,
-      "architecture-diagram.png": "diagram:kyverno",
-      "demo-link.txt": "https://example.com/demos/kyverno-policy-gitops",
-      "tech-stack.json": JSON.stringify(
-        {
-          engine: "Kyverno",
-          delivery: "GitOps repository",
-          policy_domains: [
-            "pod-security",
-            "registry-enforcement",
-            "resource-labeling",
-            "secrets-hygiene",
-          ],
-          cluster: "OKD",
-        },
-        null,
-        2
-      ),
+OpenShift - Tekton - ArgoCD - Kyverno - OpenBao - Prometheus - Grafana - Jaeger - ELK
+
+## Statut
+Livré en tant que Projet de Fin d'Études (PFE), ESPRIT.`,
+    },
+    diagram: "diagram:paas",
+    demoLink: "https://github.com/zayatihamza",
+    techStack: {
+      platform: "OpenShift",
+      cicd: "Tekton",
+      gitops: "ArgoCD",
+      security: ["RBAC", "SCC", "NetworkPolicies", "Kyverno", "OpenBao"],
+      observability: ["Prometheus", "Grafana", "Jaeger", "ELK"],
     },
   },
   {
-    slug: "Developer-Hub-SSO",
-    name: "Developer-Hub-SSO",
-    summary: "Red Hat Developer Hub (Backstage) + Keycloak SSO",
-    files: {
-      "README.md": `# Developer Hub (Backstage) + SSO
+    slug: "AI-Terraform-Provisioning-Agent",
+    summary: {
+      en: "RAG-powered AI agent that provisions Cloud infrastructure via Terraform",
+      fr: "Agent IA (RAG) qui provisionne l'infrastructure Cloud via Terraform",
+    },
+    readme: {
+      en: `# AI Terraform Provisioning Agent (RAG)
 
-Internal developer portal deployed via Helm on OKD, integrated with an
-existing Keycloak realm for single sign-on.
+Engineering internship (3S Standard Sharing Software, Jul - Sep 2025):
+an AI agent that automates CloudStack resource provisioning through Terraform.
 
-## What shipped
-- Helm-based deployment of Red Hat Developer Hub (RHDH / Backstage)
-- OIDC integration against Keycloak, including TLS and redirect-URI fixes
-- User identity resolution mapped from Keycloak claims
-- Startup / readiness probe tuning for reliable rollouts
+## Architecture
+- Ingestion of infrastructure docs with Firecrawl
+- Chunking / segmentation with LangChain
+- Vector indexing and retrieval with Milvus
+- Autonomous Terraform configuration generation via LLaMA3-70B (Groq API)
 
 ## Outcome
-SSO confirmed working end-to-end; developers authenticate against the same
-identity provider used across the platform.
+Reduced deployment time and cut manual-configuration errors by generating
+validated Terraform straight from natural-language infrastructure requests.
 
 ## Stack
-Red Hat Developer Hub - Helm - Keycloak (OIDC) - OKD`,
-      "architecture-diagram.png": "diagram:backstage",
-      "demo-link.txt": "https://example.com/demos/developer-hub-sso",
-      "tech-stack.json": JSON.stringify(
-        {
-          app: "Red Hat Developer Hub (Backstage)",
-          delivery: "Helm chart",
-          auth: "Keycloak (OIDC / SSO)",
-          cluster: "OKD",
-        },
-        null,
-        2
-      ),
+Terraform - CloudStack - LangChain - Firecrawl - Milvus - LLaMA3-70B (Groq)`,
+      fr: `# Agent IA de Provisioning Terraform (RAG)
+
+Stage ingénieur (3S Standard Sharing Software, Juil - Sept 2025) :
+un agent IA qui automatise le provisioning de ressources CloudStack via Terraform.
+
+## Architecture
+- Ingestion des documents d'infrastructure avec Firecrawl
+- Segmentation (chunking) avec LangChain
+- Indexation et recherche vectorielle avec Milvus
+- Génération autonome de configurations Terraform via LLaMA3-70B (API Groq)
+
+## Résultat
+Réduction du temps de déploiement et des erreurs de configuration manuelle
+grâce à la génération de Terraform validé à partir de requêtes en langage naturel.
+
+## Stack
+Terraform - CloudStack - LangChain - Firecrawl - Milvus - LLaMA3-70B (Groq)`,
+    },
+    diagram: "diagram:rag",
+    demoLink: "https://github.com/zayatihamza",
+    techStack: {
+      target: "CloudStack",
+      iac: "Terraform",
+      rag_pipeline: { ingestion: "Firecrawl", chunking: "LangChain", vector_store: "Milvus" },
+      llm: "LLaMA3-70B via Groq API",
     },
   },
   {
-    slug: "Observability-Stack",
-    name: "Observability-Stack",
-    summary: "Cluster metrics, alerting & capacity signal",
-    files: {
-      "README.md": `# Observability Stack
+    slug: "Jenkins-K8s-CICD-Pipeline",
+    summary: {
+      en: "End-to-end CI/CD pipeline with Jenkins, Kubernetes & Helm",
+      fr: "Pipeline CI/CD de bout en bout avec Jenkins, Kubernetes et Helm",
+    },
+    readme: {
+      en: `# Jenkins / Kubernetes CI/CD Pipeline
 
-Metrics and capacity-planning tooling for a resource-constrained 3-node
-cluster, used to catch scheduling and infra failures before they page
-someone at 3am.
+Personal project (Oct 2025): a complete CI/CD pipeline from commit to
+production-style deployment.
 
-## What it covers
-- Prometheus scheduling made reliable under tight CPU-request headroom
-- Diagnosed a machine-config operator degradation traced to intermittent
-  filesystem-full errors over an extended window
-- Right-sized workload CPU requests cluster-wide to unblock scheduling
-- Capacity conclusion: a dedicated worker node was the only durable fix
+## Pipeline stages
+- Unit testing with JUnit
+- Code quality gating with SonarQube
+- Artifact management with Nexus
+- Multi-stage Docker builds
+- Continuous deployment to Kubernetes via Helm
+- Infrastructure & pipeline monitoring with Prometheus and Grafana dashboards
 
 ## Stack
-Prometheus - Alertmanager - OKD metrics stack`,
-      "architecture-diagram.png": "diagram:observability",
-      "demo-link.txt": "https://example.com/demos/observability-stack",
-      "tech-stack.json": JSON.stringify(
-        {
-          metrics: "Prometheus",
-          alerting: "Alertmanager",
-          focus: ["capacity planning", "scheduling reliability", "node health"],
-          cluster: "OKD, 3-node",
-        },
-        null,
-        2
-      ),
+Jenkins - JUnit - SonarQube - Nexus - Docker - Kubernetes - Helm - Prometheus - Grafana`,
+      fr: `# Pipeline CI/CD Jenkins / Kubernetes
+
+Projet personnel (Octobre 2025) : un pipeline CI/CD complet, du commit
+jusqu'au déploiement en conditions proches de la production.
+
+## Étapes du pipeline
+- Tests unitaires avec JUnit
+- Contrôle qualité du code avec SonarQube
+- Gestion des artefacts avec Nexus
+- Builds Docker multi-stage
+- Déploiement continu sur Kubernetes via Helm
+- Supervision de l'infrastructure et du pipeline avec des dashboards Prometheus et Grafana
+
+## Stack
+Jenkins - JUnit - SonarQube - Nexus - Docker - Kubernetes - Helm - Prometheus - Grafana`,
+    },
+    diagram: "diagram:cicd",
+    demoLink: "https://github.com/zayatihamza",
+    techStack: {
+      ci: "Jenkins",
+      testing: "JUnit",
+      quality: "SonarQube",
+      artifacts: "Nexus",
+      containerization: "Docker (multi-stage)",
+      deployment: "Kubernetes via Helm",
+      monitoring: ["Prometheus", "Grafana"],
+    },
+  },
+  {
+    slug: "OpenStack-Multitenant-SaaS",
+    summary: {
+      en: "Private cloud (OpenStack) + multi-tenant SaaS application",
+      fr: "Cloud privé (OpenStack) + application SaaS multi-tenant",
+    },
+    readme: {
+      en: `# Private Cloud & Multi-tenant SaaS
+
+Personal project (Nov 2024 - May 2025): a private IaaS cloud paired with a
+multi-tenant SaaS application built on top of it.
+
+## What shipped
+- Multi-node OpenStack deployment (Compute, Storage, Network) automated
+  with Ansible
+- Multi-tenant SaaS app (Spring Boot / Angular) with Stripe billing and
+  real-time features over WebSockets
+- Hybrid orchestration extending workloads onto Azure AKS
+- Full application-metrics monitoring across the hybrid setup
+
+## Stack
+OpenStack - Ansible - Spring Boot - Angular - Stripe - WebSockets - Azure AKS`,
+      fr: `# Cloud Privé & SaaS Multi-tenant
+
+Projet personnel (Nov 2024 - Mai 2025) : un cloud privé IaaS associé à une
+application SaaS multi-tenant construite par-dessus.
+
+## Réalisations
+- Déploiement OpenStack multi-nœuds (Compute, Storage, Network) automatisé
+  avec Ansible
+- Application SaaS multi-tenant (Spring Boot / Angular) avec facturation
+  Stripe et fonctionnalités temps réel via WebSockets
+- Orchestration hybride étendant les workloads vers Azure AKS
+- Supervision complète des métriques applicatives sur l'ensemble hybride
+
+## Stack
+OpenStack - Ansible - Spring Boot - Angular - Stripe - WebSockets - Azure AKS`,
+    },
+    diagram: "diagram:openstack",
+    demoLink: "https://github.com/zayatihamza",
+    techStack: {
+      iaas: "OpenStack (Compute, Storage, Network)",
+      automation: "Ansible",
+      app: { backend: "Spring Boot", frontend: "Angular" },
+      billing: "Stripe",
+      realtime: "WebSockets",
+      hybrid_cloud: "Azure AKS",
+    },
+  },
+  {
+    slug: "Confera-Conference-Manager",
+    summary: {
+      en: "Hybrid desktop + web conference management system",
+      fr: "Système hybride de gestion de conférences (desktop + web)",
+    },
+    readme: {
+      en: `# Confera - Conference Management System
+
+Academic project (Jan - May 2024): a hybrid conference-management solution
+spanning a desktop client and a web application.
+
+## What shipped
+- Desktop application built with JavaFX
+- Web application built with Symfony
+- Shared MySQL database across both clients
+- Agile delivery: sprint planning and tracking with Jira, versioning with Git
+
+## Stack
+JavaFX - Symfony - MySQL - Jira - Git`,
+      fr: `# Confera - Système de Gestion de Conférences
+
+Projet académique (Jan - Mai 2024) : une solution hybride de gestion de
+conférences combinant un client desktop et une application web.
+
+## Réalisations
+- Application desktop développée avec JavaFX
+- Application web développée avec Symfony
+- Base de données MySQL partagée entre les deux clients
+- Gestion de projet agile : sprints planifiés et suivis avec Jira, versioning avec Git
+
+## Stack
+JavaFX - Symfony - MySQL - Jira - Git`,
+    },
+    diagram: "diagram:confera",
+    demoLink: "https://github.com/zayatihamza",
+    techStack: {
+      desktop: "JavaFX",
+      web: "Symfony",
+      database: "MySQL",
+      workflow: "Agile (Jira, Git)",
     },
   },
 ];
 
-const SKILLS = [
-  { category: "Platform / Kubernetes", level: 92, items: ["OpenShift (OKD)", "Kubernetes", "CRI-O", "OVN-Kubernetes", "Helm"] },
-  { category: "GitOps & Policy", level: 85, items: ["Kyverno", "GitOps workflows", "ClusterPolicy design", "Config as code"] },
-  { category: "CI/CD", level: 78, items: ["Tekton", "Pipelines as code", "Container builds"] },
-  { category: "Observability", level: 82, items: ["Prometheus", "Alertmanager", "Capacity planning"] },
-  { category: "Identity & Security", level: 80, items: ["Keycloak / OIDC", "SSO integration", "Security hardening"] },
-  { category: "Infra & Virtualization", level: 88, items: ["vSphere", "etcd operations", "Linux (RHEL/CoreOS)", "SSH / bastion ops"] },
+function getProjects(lang) {
+  return PROJECT_DATA.map((p) => ({
+    slug: p.slug,
+    name: p.slug,
+    summary: p.summary[lang],
+    files: {
+      "README.md": p.readme[lang],
+      "architecture-diagram.png": p.diagram,
+      "demo-link.txt": p.demoLink,
+      "tech-stack.json": JSON.stringify(p.techStack, null, 2),
+    },
+  }));
+}
+
+const EXPERIENCE_DATA = [
+  {
+    role: { en: "Final-year Project - Cloud PaaS / DevSecOps", fr: "Projet de Fin d'Études - Cloud PaaS / DevSecOps" },
+    org: "3S Standard Sharing Software",
+    location: { en: "Tunis, Tunisia", fr: "Tunis, Tunisie" },
+    period: { en: "Feb 2026 - Jul 2026", fr: "Fév 2026 - Juil 2026" },
+    bullets: {
+      en: [
+        "Designed and deployed a DevSecOps PaaS platform on OpenShift",
+        "Automated microservice integration, validation and deployment with Tekton CI/CD",
+        "Implemented GitOps with ArgoCD to sync and deploy microservices to the cluster",
+        "Hardened the platform with RBAC, SCC, NetworkPolicies, Kyverno and OpenBao",
+        "Integrated observability with Prometheus, Grafana, Jaeger and ELK",
+      ],
+      fr: [
+        "Conception et déploiement d'une plateforme PaaS DevSecOps basée sur OpenShift",
+        "Automatisation de l'intégration, de la validation et du déploiement de microservices avec Tekton CI/CD",
+        "Mise en œuvre du GitOps avec ArgoCD pour synchroniser et déployer les microservices sur le cluster",
+        "Sécurisation de la plateforme avec RBAC, SCC, NetworkPolicies, Kyverno et OpenBao",
+        "Intégration de l'observabilité avec Prometheus, Grafana, Jaeger et ELK",
+      ],
+    },
+  },
+  {
+    role: { en: "Engineering Intern - Cloud & AI", fr: "Stage Ingénieur - Cloud & IA" },
+    org: "3S Standard Sharing Software",
+    location: { en: "Tunis, Tunisia", fr: "Tunis, Tunisie" },
+    period: { en: "Jul 2025 - Sep 2025", fr: "Juil 2025 - Sept 2025" },
+    bullets: {
+      en: [
+        "Designed an AI agent (RAG) automating CloudStack provisioning via Terraform",
+        "Built the RAG pipeline: ingestion (Firecrawl), chunking (LangChain), vector indexing (Milvus)",
+        "Integrated LLaMA3-70B via the Groq API for autonomous infrastructure config generation",
+        "Reduced deployment time and manual configuration errors",
+      ],
+      fr: [
+        "Conception d'un agent IA (RAG) automatisant le provisioning CloudStack via Terraform",
+        "Architecture RAG : ingestion (Firecrawl), segmentation (LangChain), indexation vectorielle (Milvus)",
+        "Intégration de LLaMA3-70B via l'API Groq pour la génération autonome de configurations d'infrastructure",
+        "Optimisation des temps de déploiement et réduction des erreurs de configuration manuelle",
+      ],
+    },
+  },
+  {
+    role: { en: "Full-stack Intern", fr: "Stage Full-stack" },
+    org: "Arabsoft",
+    location: { en: "Tunis, Tunisia", fr: "Tunis, Tunisie" },
+    period: { en: "Jul 2024 - Aug 2024", fr: "Juil 2024 - Août 2024" },
+    bullets: {
+      en: [
+        "Built a full-stack HR portal (employee & process management) with Spring Boot and Angular",
+        "Secured auth/authorization with Keycloak and Spring Security (JWT)",
+        "Designed REST APIs, automated tests with Postman, collaborative Git workflow",
+      ],
+      fr: [
+        "Développement Full-stack d'un portail RH (gestion employés / processus) avec Spring Boot et Angular",
+        "Sécurisation (auth / autorisation) via Keycloak et Spring Security (JWT)",
+        "Conception d'API REST, tests automatisés (Postman) et gestion de version collaborative sous Git",
+      ],
+    },
+  },
 ];
 
-const BIO = {
-  name: "Hamza",
-  role: "Platform / Infrastructure Engineer",
-  tagline: "I keep clusters alive and etcd quorate.",
-  location: "Bizerte, Tunisia",
-  about: `I run and harden a self-hosted OKD (OpenShift) platform end to end - from
-bare-metal-style vSphere installs to GitOps-managed security policy and
-day-2 incident response. I like systems that fail loudly in staging and
-quietly in production.`,
-  facts: [
-    { label: "Focus", value: "Kubernetes / OpenShift platform engineering" },
-    { label: "Cluster", value: "3-node OKD on vSphere" },
-    { label: "Currently", value: "Security hardening with Kyverno + GitOps" },
-    { label: "Languages", value: "English, French" },
-  ],
+function getExperience(lang) {
+  return EXPERIENCE_DATA.map((e) => ({
+    role: e.role[lang],
+    org: `${e.org} - ${e.location[lang]}`,
+    period: e.period[lang],
+    bullets: e.bullets[lang],
+  }));
+}
+
+const EDUCATION_DATA = [
+  {
+    degree: { en: "Engineering Degree in Computer Science (Cloud Computing)", fr: "Diplôme National d'Ingénieur en Informatique (Cloud Computing)" },
+    org: "ESPRIT",
+    location: { en: "Tunis, Tunisia", fr: "Tunis, Tunisie" },
+    period: "2026",
+  },
+  {
+    degree: { en: "Integrated Prep Cycle (Math-Physics-Computer Science)", fr: "Cycle Préparatoire Intégré (Math-Physique-Informatique)" },
+    org: "Faculté des Sciences de Tunis",
+    location: { en: "Tunis, Tunisia", fr: "Tunis, Tunisie" },
+    period: "2021 - 2023",
+  },
+];
+
+function getEducation(lang) {
+  return EDUCATION_DATA.map((e) => ({
+    degree: e.degree[lang],
+    org: `${e.org} - ${e.location[lang]}`,
+    period: e.period,
+  }));
+}
+
+const CERTIFICATIONS = [
+  "CCNA: Switching, Routing, and Wireless Essentials",
+  "AWS: Cloud Foundations - Cloud Operations",
+];
+
+const SKILLS_DATA = [
+  { category: { en: "Cloud & IaC", fr: "Cloud & IaC" }, level: 90, items: ["OpenShift", "Microsoft Azure", "OpenStack", "Terraform", "Ansible"] },
+  { category: { en: "Containers & Orchestration", fr: "Conteneurs & Orchestration" }, level: 88, items: ["Docker", "Kubernetes (AKS)", "Helm"] },
+  { category: { en: "CI/CD & Tooling", fr: "CI/CD & Outils" }, level: 85, items: ["Jenkins", "Tekton", "Maven", "SonarQube"] },
+  { category: { en: "Monitoring & Observability", fr: "Supervision & Observabilité" }, level: 82, items: ["Prometheus", "Grafana", "Jaeger", "ELK"] },
+  { category: { en: "Security & GitOps", fr: "Sécurité & GitOps" }, level: 84, items: ["RBAC", "SCC", "NetworkPolicies", "Kyverno", "OpenBao", "ArgoCD"] },
+  { category: { en: "Languages", fr: "Langages" }, level: 80, items: ["Java", "Python", "Shell", "JavaScript / TypeScript", "C++"] },
+  { category: { en: "Frameworks", fr: "Frameworks" }, level: 78, items: ["Spring Boot", "Spring Security", "Angular"] },
+  { category: { en: "Databases", fr: "Bases de données" }, level: 75, items: ["MySQL", "Oracle", "MongoDB", "Milvus"] },
+];
+
+function getSkills(lang) {
+  return SKILLS_DATA.map((s) => ({ category: s.category[lang], level: s.level, items: s.items }));
+}
+
+const BIO_DATA = {
+  role: { en: "Cloud / DevSecOps Engineer", fr: "Ingénieur Cloud / DevSecOps" },
+  tagline: {
+    en: "I build and secure the platforms other people ship on.",
+    fr: "Je construis et sécurise les plateformes sur lesquelles les autres déploient.",
+  },
+  location: { en: "Tunis, Tunisia", fr: "Tunis, Tunisie" },
+  about: {
+    en: `Computer engineer specialized in IT Architecture and Cloud Computing, with
+hands-on experience automating secure deployments (DevSecOps), hardening
+cloud platforms, and integrating AI solutions into cloud infrastructure.`,
+    fr: `Ingénieur en informatique, spécialisé en Architectures IT et Cloud Computing,
+avec une expérience pratique dans l'automatisation sécurisée des déploiements
+(DevSecOps), la sécurisation des plateformes cloud et l'intégration de
+solutions IA pour l'infrastructure cloud.`,
+  },
+  facts: {
+    en: [
+      { label: "Focus", value: "Cloud / DevSecOps engineering" },
+      { label: "Degree", value: "Engineering Degree in Computer Science - ESPRIT, 2026" },
+      { label: "Currently", value: "OpenShift PaaS platform - security & GitOps" },
+      { label: "Languages", value: "French (fluent), English (fluent)" },
+    ],
+    fr: [
+      { label: "Spécialité", value: "Ingénierie Cloud / DevSecOps" },
+      { label: "Diplôme", value: "Diplôme National d'Ingénieur en Informatique - ESPRIT, 2026" },
+      { label: "Actuellement", value: "Plateforme PaaS OpenShift - sécurité & GitOps" },
+      { label: "Langues", value: "Français (courant), Anglais (courant)" },
+    ],
+  },
 };
+
+function getBio(lang) {
+  return {
+    name: BIO_CONTACT.name,
+    role: BIO_DATA.role[lang],
+    tagline: BIO_DATA.tagline[lang],
+    location: BIO_DATA.location[lang],
+    about: BIO_DATA.about[lang],
+    facts: BIO_DATA.facts[lang],
+    email: BIO_CONTACT.email,
+    phone: BIO_CONTACT.phone,
+    linkedin: BIO_CONTACT.linkedin,
+    github: BIO_CONTACT.github,
+  };
+}
+
+/* ============================== UI STRINGS ============================== */
+
+const UI_STRINGS = {
+  en: {
+    appTitles: { files: "Files", terminal: "Terminal", about: "About Me", skills: "Skills", contact: "Contact", resume: "Resume", settings: "Settings" },
+    boot: { booting: "HamzaOS booting" },
+    login: { role: "Platform Engineer", signingIn: "Signing in…", skip: "skip → enter as guest" },
+    toasts: { welcome: "👋 Welcome to HamzaOS — try opening the Terminal", rightClick: "💡 Right-click the desktop for quick actions", newFolder: "📁 New folder created (demo mode)", refreshed: "Desktop refreshed" },
+    contextMenu: { newFolder: "New Folder", changeWallpaper: "Change Wallpaper", refresh: "Refresh" },
+    files: { places: "Places", home: "Home", projects: "Projects" },
+    terminal: {
+      banner: "HamzaOS Terminal v1.0 - type 'help' to get started.",
+      help: "Commands: ls, cd <dir>, cat <file>, pwd, whoami, skills --list, open <app>, clear, contact, resume, help",
+      emptyDir: "(empty)",
+      cdUsage: "usage: cat <file>",
+      cdError: (a) => `cd: no such directory: ${a}`,
+      catUsage: "usage: cat <file>",
+      catBinary: "[binary file - open in Files app to view]",
+      catError: (a) => `cat: ${a}: No such file`,
+      openError: "open: unknown app 'ARG'. Try: files, about, skills, contact, resume, settings",
+      openOpening: (a) => `Opening ${a}...`,
+      openingResume: "Opening resume...",
+      sudo: "Nice try. This is a portfolio, not a production cluster. 😄",
+      notFound: (c) => `command not found: ${c} (type 'help')`,
+    },
+    contact: { emailBtn: "Email", githubBtn: "GitHub", linkedinBtn: "LinkedIn", namePh: "Your name", emailPh: "Your email", messagePh: "Message", send: "Send message", sent: "Sent (demo)" },
+    resume: { experience: "Experience", skills: "Skills", projects: "Projects", education: "Education", certifications: "Certifications", download: "Download" },
+    settings: { appearance: "Appearance", dark: "Dark mode", light: "Light mode", wallpaper: "Wallpaper", language: "Language", footer: "HamzaOS is a portfolio, not a real operating system — but the windows still drag, the terminal still runs, and nothing here will page anyone at 3am." },
+    brand: "HamzaOS",
+  },
+  fr: {
+    appTitles: { files: "Fichiers", terminal: "Terminal", about: "À propos", skills: "Compétences", contact: "Contact", resume: "CV", settings: "Paramètres" },
+    boot: { booting: "Démarrage de HamzaOS" },
+    login: { role: "Ingénieur Plateforme", signingIn: "Connexion en cours…", skip: "passer → entrer en invité" },
+    toasts: { welcome: "👋 Bienvenue sur HamzaOS — essayez d'ouvrir le Terminal", rightClick: "💡 Clic droit sur le bureau pour les actions rapides", newFolder: "📁 Nouveau dossier créé (mode démo)", refreshed: "Bureau actualisé" },
+    contextMenu: { newFolder: "Nouveau dossier", changeWallpaper: "Changer de fond d'écran", refresh: "Actualiser" },
+    files: { places: "Emplacements", home: "Accueil", projects: "Projets" },
+    terminal: {
+      banner: "Terminal HamzaOS v1.0 - tapez 'help' pour commencer.",
+      help: "Commandes : ls, cd <dossier>, cat <fichier>, pwd, whoami, skills --list, open <app>, clear, contact, resume, help",
+      emptyDir: "(vide)",
+      cdUsage: "usage : cat <fichier>",
+      cdError: (a) => `cd : dossier introuvable : ${a}`,
+      catUsage: "usage : cat <fichier>",
+      catBinary: "[fichier binaire - ouvrir dans l'app Fichiers pour visualiser]",
+      catError: (a) => `cat : ${a} : fichier introuvable`,
+      openError: "open : application inconnue 'ARG'. Essayez : files, about, skills, contact, resume, settings",
+      openOpening: (a) => `Ouverture de ${a}...`,
+      openingResume: "Ouverture du CV...",
+      sudo: "Belle tentative. Ceci est un portfolio, pas un cluster de production. 😄",
+      notFound: (c) => `commande introuvable : ${c} (tapez 'help')`,
+    },
+    contact: { emailBtn: "Email", githubBtn: "GitHub", linkedinBtn: "LinkedIn", namePh: "Votre nom", emailPh: "Votre email", messagePh: "Message", send: "Envoyer", sent: "Envoyé (démo)" },
+    resume: { experience: "Expérience", skills: "Compétences", projects: "Projets", education: "Formation", certifications: "Certifications", download: "Télécharger" },
+    settings: { appearance: "Apparence", dark: "Mode sombre", light: "Mode clair", wallpaper: "Fond d'écran", language: "Langue", footer: "HamzaOS est un portfolio, pas un vrai système d'exploitation — mais les fenêtres se déplacent, le terminal fonctionne, et rien ici ne réveillera personne à 3h du matin." },
+    brand: "HamzaOS",
+  },
+};
+
+/* ============================== LANGUAGE CONTEXT ============================== */
+
+const LangContext = createContext(null);
+function useLang() {
+  return useContext(LangContext);
+}
 
 /* ============================== HELPERS ============================== */
 
 const TOPBAR_H = 34;
 const DOCK_W = 68;
+
 
 function useNow() {
   const [now, setNow] = useState(new Date());
@@ -397,6 +715,7 @@ function ParticleField({ theme, reducedMotion }) {
 /* ============================== BOOT / LOGIN ============================== */
 
 function BootScreen({ onDone }) {
+  const { t } = useLang();
   const [pct, setPct] = useState(0);
   useEffect(() => {
     const t0 = Date.now();
@@ -428,13 +747,14 @@ function BootScreen({ onDone }) {
         />
       </div>
       <div className="font-mono text-[11px] tracking-[0.25em] text-white/30 uppercase">
-        HamzaOS booting
+        {t.boot.booting}
       </div>
     </div>
   );
 }
 
 function LoginScreen({ onDone }) {
+  const { t } = useLang();
   const FULL = "hamza";
   const [typed, setTyped] = useState("");
   const [stage, setStage] = useState("typing"); // typing -> password -> signing -> done
@@ -484,7 +804,7 @@ function LoginScreen({ onDone }) {
             {typed}
             <span className="inline-block w-[2px] h-5 bg-[#5eead4] ml-0.5 align-middle animate-pulse" />
           </div>
-          <div className="text-[11px] text-white/35 tracking-wide">Platform Engineer</div>
+          <div className="text-[11px] text-white/35 tracking-wide">{t.login.role}</div>
         </div>
 
         <div className="mt-2 h-9 flex items-center">
@@ -501,7 +821,7 @@ function LoginScreen({ onDone }) {
           )}
           {stage === "signing" && (
             <div className="text-[12px] font-mono text-[#5eead4]/80 tracking-wide animate-pulse">
-              Signing in&hellip;
+              {t.login.signingIn}
             </div>
           )}
         </div>
@@ -512,7 +832,7 @@ function LoginScreen({ onDone }) {
           onClick={onDone}
           className="text-[11px] text-white/35 hover:text-white/70 transition-colors font-mono tracking-wide underline underline-offset-4 decoration-white/20"
         >
-          skip &rarr; enter as guest
+          {t.login.skip}
         </button>
       </div>
     </div>
@@ -597,6 +917,7 @@ function ToastStack({ toasts, onDismiss }) {
 /* ============================== TOP BAR ============================== */
 
 function TopBar({ now, uptimeMs, theme, onToggleTheme, isMobile, mobileTitle, onMobileBack }) {
+  const { lang, setLang } = useLang();
   return (
     <div
       className="fixed top-0 left-0 right-0 z-[70] flex items-center justify-between px-3 select-none backdrop-blur-xl border-b"
@@ -623,6 +944,14 @@ function TopBar({ now, uptimeMs, theme, onToggleTheme, isMobile, mobileTitle, on
         <div className="flex items-center gap-1" title="Connected">
           <Wifi size={13} />
         </div>
+        <button
+          onClick={() => setLang(lang === "en" ? "fr" : "en")}
+          className="flex items-center gap-1 px-1.5 py-0.5 rounded-md hover:bg-[var(--accentSoft)] transition-colors"
+          title="Language"
+        >
+          <Languages size={13} />
+          <span className="uppercase tracking-wide" style={{ color: "var(--text)" }}>{lang}</span>
+        </button>
         <span style={{ color: "var(--text)" }}>{formatClock(now)}</span>
       </div>
     </div>
@@ -633,6 +962,7 @@ function TopBar({ now, uptimeMs, theme, onToggleTheme, isMobile, mobileTitle, on
 
 function DockIcon({ appId, def, active, running, onClick, isMobile }) {
   const [hover, setHover] = useState(false);
+  const { t } = useLang();
   const Icon = def.icon;
   return (
     <div
@@ -645,7 +975,7 @@ function DockIcon({ appId, def, active, running, onClick, isMobile }) {
           className="absolute left-[64px] px-2.5 py-1 rounded-lg text-[12px] whitespace-nowrap backdrop-blur-xl border shadow-lg animate-[fadeIn_0.15s_ease]"
           style={{ background: "var(--panel)", borderColor: "var(--border)", color: "var(--text)" }}
         >
-          {def.title}
+          {t.appTitles[appId]}
         </div>
       )}
       <button
@@ -715,6 +1045,7 @@ const RESIZE_EDGES = ["n", "s", "e", "w", "ne", "nw", "se", "sw"];
 function WindowFrame({ win, isActive, isMobile, onFocus, onClose, onMinimize, onToggleMaximize, dragRef, resizeRef, setSnapPreview, children }) {
   const def = APP_DEFS[win.appId];
   const Icon = def.icon;
+  const { t } = useLang();
 
   if (win.minimized) return null;
 
@@ -794,7 +1125,7 @@ function WindowFrame({ win, isActive, isMobile, onFocus, onClose, onMinimize, on
         <div className="flex items-center gap-2 min-w-0">
           <Icon size={13.5} style={{ color: "var(--accent)" }} />
           <span className="text-[12.5px] font-medium truncate" style={{ color: "var(--text)" }}>
-            {win.title}
+            {t.appTitles[win.appId]}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -841,10 +1172,11 @@ function fileIcon(filename) {
 
 function DiagramMock({ kind }) {
   const boxes = {
-    okd: ["LB", "Master-1", "Master-2", "Master-3", "etcd", "CRI-O"],
-    kyverno: ["Git Repo", "Sync", "Kyverno", "Admission", "ClusterPolicy"],
-    backstage: ["Backstage", "OIDC", "Keycloak", "Users"],
-    observability: ["Workloads", "Prometheus", "Alertmanager", "On-call"],
+    paas: ["Git", "Tekton", "ArgoCD", "OpenShift", "Kyverno", "OpenBao"],
+    rag: ["Docs", "Firecrawl", "LangChain", "Milvus", "LLaMA3-70B", "Terraform"],
+    cicd: ["Commit", "Jenkins", "SonarQube", "Nexus", "Docker", "K8s / Helm"],
+    openstack: ["Ansible", "OpenStack", "SaaS App", "Azure AKS"],
+    confera: ["JavaFX", "MySQL", "Symfony"],
   }[kind] || ["Node A", "Node B", "Node C"];
 
   return (
@@ -942,10 +1274,11 @@ function FilePreview({ project, filename }) {
 }
 
 function FilesApp({ pushToast }) {
+  const { t, content } = useLang();
   const [openFolder, setOpenFolder] = useState(null); // project slug
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const project = PROJECTS.find((p) => p.slug === openFolder);
+  const project = content.projects.find((p) => p.slug === openFolder);
 
   return (
     <div className="flex h-full text-[13px]" style={{ color: "var(--text)" }}>
@@ -954,7 +1287,7 @@ function FilesApp({ pushToast }) {
         style={{ borderColor: "var(--border)", background: "var(--panel2)" }}
       >
         <div className="text-[10.5px] uppercase tracking-wider px-2 py-1.5" style={{ color: "var(--textFaint)" }}>
-          Places
+          {t.files.places}
         </div>
         <button
           onClick={() => {
@@ -963,12 +1296,12 @@ function FilesApp({ pushToast }) {
           }}
           className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[var(--accentSoft)] text-left"
         >
-          <Home size={14} style={{ color: "var(--textMuted)" }} /> Home
+          <Home size={14} style={{ color: "var(--textMuted)" }} /> {t.files.home}
         </button>
         <div className="text-[10.5px] uppercase tracking-wider px-2 pt-3 pb-1.5" style={{ color: "var(--textFaint)" }}>
-          Projects
+          {t.files.projects}
         </div>
-        {PROJECTS.map((p) => (
+        {content.projects.map((p) => (
           <button
             key={p.slug}
             onClick={() => {
@@ -992,7 +1325,7 @@ function FilesApp({ pushToast }) {
           className="px-4 py-2 text-[12px] flex items-center gap-1.5 border-b font-mono"
           style={{ borderColor: "var(--border)", color: "var(--textMuted)" }}
         >
-          <span>~/Projects</span>
+          <span>~/{t.files.projects}</span>
           {project && (
             <>
               <ChevronRight size={12} />
@@ -1010,7 +1343,7 @@ function FilesApp({ pushToast }) {
         <div className="flex-1 overflow-auto">
           {!project && (
             <div className="p-6 grid grid-cols-3 gap-5">
-              {PROJECTS.map((p) => (
+              {content.projects.map((p) => (
                 <button
                   key={p.slug}
                   onDoubleClick={() => setOpenFolder(p.slug)}
@@ -1058,9 +1391,9 @@ function FilesApp({ pushToast }) {
 
 /* ============================== TERMINAL ============================== */
 
-function buildFsTree() {
+function buildFsTree(projects) {
   const tree = { Projects: {} };
-  for (const p of PROJECTS) {
+  for (const p of projects) {
     tree.Projects[p.name] = { __files: p.files };
   }
   return tree;
@@ -1089,11 +1422,10 @@ function getNode(tree, pathArr) {
 }
 
 function TerminalApp({ openApp, pushToast }) {
-  const fsTree = useMemo(buildFsTree, []);
+  const { t, lang, content } = useLang();
+  const fsTree = useMemo(() => buildFsTree(content.projects), [content.projects]);
   const [cwd, setCwd] = useState([]);
-  const [lines, setLines] = useState([
-    { type: "banner", text: "HamzaOS Terminal v1.0 - type 'help' to get started." },
-  ]);
+  const [lines, setLines] = useState([{ type: "banner", text: t.terminal.banner }]);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([]);
   const [histIdx, setHistIdx] = useState(-1);
@@ -1117,12 +1449,11 @@ function TerminalApp({ openApp, pushToast }) {
 
     const [cmd, ...rest] = cmdline.split(" ");
     const arg = rest.join(" ").trim();
+    const tt = t.terminal;
 
     switch (cmd) {
       case "help":
-        print(
-          "Commands: ls, cd <dir>, cat <file>, pwd, whoami, skills --list, open <app>, clear, contact, resume, help"
-        );
+        print(tt.help);
         break;
       case "clear":
         setLines([]);
@@ -1131,12 +1462,12 @@ function TerminalApp({ openApp, pushToast }) {
         print("/" + cwd.join("/"));
         break;
       case "whoami":
-        print(`${BIO.name} — ${BIO.role}`);
-        print(BIO.tagline);
+        print(`${content.bio.name} — ${content.bio.role}`);
+        print(content.bio.tagline);
         break;
       case "skills":
       case "skills --list":
-        SKILLS.forEach((s) => print(`${s.category.padEnd(26, " ")} ${s.items.join(", ")}`));
+        content.skills.forEach((s) => print(`${s.category.padEnd(26, " ")} ${s.items.join(", ")}`));
         break;
       case "ls": {
         const node = getNode(fsTree, cwd);
@@ -1144,7 +1475,7 @@ function TerminalApp({ openApp, pushToast }) {
         else {
           const entries = Object.keys(node).filter((k) => k !== "__files");
           const files = node.__files ? Object.keys(node.__files) : [];
-          if (!entries.length && !files.length) print("(empty)");
+          if (!entries.length && !files.length) print(tt.emptyDir);
           print([...entries.map((e) => e + "/"), ...files].join("   "));
         }
         break;
@@ -1154,22 +1485,22 @@ function TerminalApp({ openApp, pushToast }) {
         const node = getNode(fsTree, target);
         if (arg === "" || arg === "~") setCwd([]);
         else if (node && typeof node === "object") setCwd(target);
-        else print(`cd: no such directory: ${arg}`, "error");
+        else print(tt.cdError(arg), "error");
         break;
       }
       case "cat": {
         if (!arg) {
-          print("usage: cat <file>", "error");
+          print(tt.catUsage, "error");
           break;
         }
         const dirNode = getNode(fsTree, cwd);
         const filesHere = dirNode && dirNode.__files;
         if (filesHere && arg in filesHere) {
-          const content = filesHere[arg];
-          if (arg === "architecture-diagram.png") print("[binary file - open in Files app to view]");
-          else print(content.split(":")[0] === "diagram" ? "[diagram]" : content);
+          const fileContent = filesHere[arg];
+          if (arg === "architecture-diagram.png") print(tt.catBinary);
+          else print(fileContent.split(":")[0] === "diagram" ? "[diagram]" : fileContent);
         } else {
-          print(`cat: ${arg}: No such file`, "error");
+          print(tt.catError(arg), "error");
         }
         break;
       }
@@ -1177,17 +1508,19 @@ function TerminalApp({ openApp, pushToast }) {
         const map = { files: "files", explorer: "files", about: "about", skills: "skills", contact: "contact", resume: "resume", settings: "settings", terminal: "terminal" };
         if (map[arg]) {
           openApp(map[arg]);
-          print(`Opening ${map[arg]}...`);
-        } else print(`open: unknown app '${arg}'. Try: files, about, skills, contact, resume, settings`, "error");
+          print(tt.openOpening(map[arg]));
+        } else print(tt.openError.replace("ARG", arg), "error");
         break;
       }
       case "contact":
-        print(`Email: hamza@example.com`);
-        print(`GitHub: github.com/hamza`);
+        print(`Email: ${content.bio.email}`);
+        print(`Phone: ${content.bio.phone}`);
+        print(`GitHub: ${content.bio.github}`);
+        print(`LinkedIn: ${content.bio.linkedin}`);
         openApp("contact");
         break;
       case "resume":
-        print("Opening resume...");
+        print(tt.openingResume);
         openApp("resume");
         break;
       case "echo":
@@ -1197,10 +1530,10 @@ function TerminalApp({ openApp, pushToast }) {
         print(new Date().toString());
         break;
       case "sudo":
-        print("Nice try. This is a portfolio, not a production cluster. 😄");
+        print(tt.sudo);
         break;
       default:
-        print(`command not found: ${cmd} (type 'help')`, "error");
+        print(tt.notFound(cmd), "error");
     }
   };
 
@@ -1274,6 +1607,8 @@ function TerminalApp({ openApp, pushToast }) {
 /* ============================== ABOUT / SKILLS / CONTACT / RESUME ============================== */
 
 function AboutApp() {
+  const { content } = useLang();
+  const bio = content.bio;
   return (
     <div className="h-full overflow-auto p-6" style={{ color: "var(--text)" }}>
       <div className="flex items-center gap-4 mb-5">
@@ -1281,18 +1616,18 @@ function AboutApp() {
           className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-mono font-bold"
           style={{ background: "var(--accentSoft)", color: "var(--accent)" }}
         >
-          {BIO.name[0]}
+          {bio.name[0]}
         </div>
         <div>
-          <div className="text-lg font-semibold">{BIO.name}</div>
-          <div className="text-[13px]" style={{ color: "var(--textMuted)" }}>{BIO.role}</div>
+          <div className="text-lg font-semibold">{bio.name}</div>
+          <div className="text-[13px]" style={{ color: "var(--textMuted)" }}>{bio.role}</div>
         </div>
       </div>
       <p className="text-[13.5px] leading-relaxed mb-5" style={{ color: "var(--textMuted)" }}>
-        {BIO.about}
+        {bio.about}
       </p>
       <div className="grid grid-cols-2 gap-3">
-        {BIO.facts.map((f) => (
+        {bio.facts.map((f) => (
           <div
             key={f.label}
             className="rounded-xl border p-3"
@@ -1310,9 +1645,10 @@ function AboutApp() {
 }
 
 function SkillsApp() {
+  const { content } = useLang();
   return (
     <div className="h-full overflow-auto p-6 flex flex-col gap-4">
-      {SKILLS.map((s) => (
+      {content.skills.map((s) => (
         <div key={s.category}>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[13px] font-medium" style={{ color: "var(--text)" }}>{s.category}</span>
@@ -1346,46 +1682,57 @@ function SkillsApp() {
 }
 
 function ContactApp() {
+  const { t, content } = useLang();
+  const bio = content.bio;
   const [sent, setSent] = useState(false);
   return (
     <div className="h-full overflow-auto p-6 flex flex-col gap-5" style={{ color: "var(--text)" }}>
+      <div className="flex flex-col gap-2 text-[12.5px]" style={{ color: "var(--textMuted)" }}>
+        <div className="flex items-center gap-2"><Mail size={13} /> {bio.email}</div>
+        <div className="flex items-center gap-2"><span className="w-[13px] text-center">📞</span> {bio.phone}</div>
+      </div>
+
       <div className="flex gap-3">
         <a
-          href="mailto:hamza@example.com"
+          href={`mailto:${bio.email}`}
           className="flex-1 flex items-center gap-2 justify-center py-2.5 rounded-xl border text-[13px] hover:bg-[var(--accentSoft)] transition-colors"
           style={{ borderColor: "var(--border)" }}
         >
-          <Mail size={15} /> Email
+          <Mail size={15} /> {t.contact.emailBtn}
         </a>
         <a
-          href="#"
+          href={bio.github}
+          target="_blank"
+          rel="noreferrer"
           className="flex-1 flex items-center gap-2 justify-center py-2.5 rounded-xl border text-[13px] hover:bg-[var(--accentSoft)] transition-colors"
           style={{ borderColor: "var(--border)" }}
         >
-          <GithubIcon size={15} /> GitHub
+          <GithubIcon size={15} /> {t.contact.githubBtn}
         </a>
         <a
-          href="#"
+          href={bio.linkedin}
+          target="_blank"
+          rel="noreferrer"
           className="flex-1 flex items-center gap-2 justify-center py-2.5 rounded-xl border text-[13px] hover:bg-[var(--accentSoft)] transition-colors"
           style={{ borderColor: "var(--border)" }}
         >
-          <LinkedinIcon size={15} /> LinkedIn
+          <LinkedinIcon size={15} /> {t.contact.linkedinBtn}
         </a>
       </div>
 
       <div className="flex flex-col gap-2.5">
         <input
-          placeholder="Your name"
+          placeholder={t.contact.namePh}
           className="px-3 py-2.5 rounded-xl border bg-transparent text-[13px] outline-none focus:border-[var(--accent)]"
           style={{ borderColor: "var(--border)" }}
         />
         <input
-          placeholder="Your email"
+          placeholder={t.contact.emailPh}
           className="px-3 py-2.5 rounded-xl border bg-transparent text-[13px] outline-none focus:border-[var(--accent)]"
           style={{ borderColor: "var(--border)" }}
         />
         <textarea
-          placeholder="Message"
+          placeholder={t.contact.messagePh}
           rows={4}
           className="px-3 py-2.5 rounded-xl border bg-transparent text-[13px] outline-none focus:border-[var(--accent)] resize-none"
           style={{ borderColor: "var(--border)" }}
@@ -1396,7 +1743,7 @@ function ContactApp() {
           style={{ background: "var(--accent)", color: "#04140f" }}
         >
           {sent ? <Check size={15} /> : <Send size={14} />}
-          {sent ? "Sent (demo)" : "Send message"}
+          {sent ? t.contact.sent : t.contact.send}
         </button>
       </div>
     </div>
@@ -1404,15 +1751,37 @@ function ContactApp() {
 }
 
 function ResumeApp() {
+  const { t, content } = useLang();
+  const bio = content.bio;
+
   const downloadResume = () => {
-    const text = `${BIO.name} — ${BIO.role}\n\n${BIO.about}\n\nSKILLS\n${SKILLS.map(
-      (s) => `- ${s.category}: ${s.items.join(", ")}`
-    ).join("\n")}\n\nPROJECTS\n${PROJECTS.map((p) => `- ${p.name}: ${p.summary}`).join("\n")}\n`;
+    const text = `${bio.name} — ${bio.role}
+${bio.email} | ${bio.phone} | ${bio.linkedin} | ${bio.github}
+
+${bio.about}
+
+${t.resume.experience.toUpperCase()}
+${content.experience.map(
+  (e) => `- ${e.role}, ${e.org} (${e.period})\n${e.bullets.map((b) => `    * ${b}`).join("\n")}`
+).join("\n\n")}
+
+${t.resume.skills.toUpperCase()}
+${content.skills.map((s) => `- ${s.category}: ${s.items.join(", ")}`).join("\n")}
+
+${t.resume.projects.toUpperCase()}
+${content.projects.map((p) => `- ${p.name}: ${p.summary}`).join("\n")}
+
+${t.resume.education.toUpperCase()}
+${content.education.map((e) => `- ${e.degree}, ${e.org} (${e.period})`).join("\n")}
+
+${t.resume.certifications.toUpperCase()}
+${content.certifications.map((c) => `- ${c}`).join("\n")}
+`;
     const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "hamza-resume.txt";
+    a.download = "hamza-zayati-resume.txt";
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -1421,37 +1790,72 @@ function ResumeApp() {
     <div className="h-full overflow-auto p-6 flex flex-col gap-5" style={{ color: "var(--text)" }}>
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-[16px] font-semibold">{BIO.name}</div>
-          <div className="text-[12.5px]" style={{ color: "var(--textMuted)" }}>{BIO.role}</div>
+          <div className="text-[16px] font-semibold">{bio.name}</div>
+          <div className="text-[12.5px]" style={{ color: "var(--textMuted)" }}>{bio.role}</div>
         </div>
         <button
           onClick={downloadResume}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12.5px] font-medium"
           style={{ background: "var(--accent)", color: "#04140f" }}
         >
-          <Download size={14} /> Download
+          <Download size={14} /> {t.resume.download}
         </button>
       </div>
 
       <div>
-        <div className="text-[11px] uppercase tracking-wide mb-2" style={{ color: "var(--textFaint)" }}>Experience</div>
-        <div className="rounded-xl border p-3.5" style={{ borderColor: "var(--border)", background: "var(--panel2)" }}>
-          <div className="text-[13px] font-medium">Platform / Infrastructure Engineer</div>
-          <div className="text-[12px] mt-0.5" style={{ color: "var(--textMuted)" }}>
-            Own and harden a self-hosted OKD platform: cluster operations, GitOps
-            security policy, identity integration, and observability.
-          </div>
+        <div className="text-[11px] uppercase tracking-wide mb-2" style={{ color: "var(--textFaint)" }}>{t.resume.experience}</div>
+        <div className="flex flex-col gap-2.5">
+          {content.experience.map((e) => (
+            <div key={e.role} className="rounded-xl border p-3.5" style={{ borderColor: "var(--border)", background: "var(--panel2)" }}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[13px] font-medium">{e.role}</div>
+                <div className="text-[11px] font-mono shrink-0" style={{ color: "var(--textFaint)" }}>{e.period}</div>
+              </div>
+              <div className="text-[11.5px] mb-1.5" style={{ color: "var(--accent)" }}>{e.org}</div>
+              <ul className="flex flex-col gap-0.5">
+                {e.bullets.map((b, i) => (
+                  <li key={i} className="text-[11.5px] pl-3 relative" style={{ color: "var(--textMuted)" }}>
+                    <span className="absolute left-0" style={{ color: "var(--accent)" }}>&bull;</span>
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 
       <div>
-        <div className="text-[11px] uppercase tracking-wide mb-2" style={{ color: "var(--textFaint)" }}>Projects</div>
+        <div className="text-[11px] uppercase tracking-wide mb-2" style={{ color: "var(--textFaint)" }}>{t.resume.projects}</div>
         <div className="flex flex-col gap-2">
-          {PROJECTS.map((p) => (
+          {content.projects.map((p) => (
             <div key={p.slug} className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
               <div className="text-[12.5px] font-medium">{p.name}</div>
               <div className="text-[11.5px]" style={{ color: "var(--textMuted)" }}>{p.summary}</div>
             </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="text-[11px] uppercase tracking-wide mb-2" style={{ color: "var(--textFaint)" }}>{t.resume.education}</div>
+        <div className="flex flex-col gap-2">
+          {content.education.map((e) => (
+            <div key={e.degree} className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
+              <div className="text-[12.5px] font-medium">{e.degree}</div>
+              <div className="text-[11.5px]" style={{ color: "var(--textMuted)" }}>{e.org} &middot; {e.period}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="text-[11px] uppercase tracking-wide mb-2" style={{ color: "var(--textFaint)" }}>{t.resume.certifications}</div>
+        <div className="flex flex-wrap gap-1.5">
+          {content.certifications.map((c) => (
+            <span key={c} className="text-[11px] px-2.5 py-1 rounded-full border" style={{ borderColor: "var(--border)", color: "var(--textMuted)" }}>
+              {c}
+            </span>
           ))}
         </div>
       </div>
@@ -1460,14 +1864,36 @@ function ResumeApp() {
 }
 
 function SettingsApp({ theme, setTheme, wallpaper, setWallpaper }) {
+  const { t, lang, setLang } = useLang();
   return (
     <div className="h-full overflow-auto p-6 flex flex-col gap-6" style={{ color: "var(--text)" }}>
       <div>
-        <div className="text-[11px] uppercase tracking-wide mb-2.5" style={{ color: "var(--textFaint)" }}>Appearance</div>
+        <div className="text-[11px] uppercase tracking-wide mb-2.5 flex items-center gap-1.5" style={{ color: "var(--textFaint)" }}>
+          <Languages size={12} /> {t.settings.language}
+        </div>
+        <div className="flex items-center rounded-xl border p-1 gap-1" style={{ borderColor: "var(--border)" }}>
+          {["en", "fr"].map((l) => (
+            <button
+              key={l}
+              onClick={() => setLang(l)}
+              className="flex-1 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors"
+              style={{
+                background: lang === l ? "var(--accent)" : "transparent",
+                color: lang === l ? "#04140f" : "var(--textMuted)",
+              }}
+            >
+              {l === "en" ? "English" : "Français"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="text-[11px] uppercase tracking-wide mb-2.5" style={{ color: "var(--textFaint)" }}>{t.settings.appearance}</div>
         <div className="flex items-center justify-between rounded-xl border p-3.5" style={{ borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2.5 text-[13px]">
             {theme === "dark" ? <Moon size={16} /> : <Sun size={16} />}
-            {theme === "dark" ? "Dark mode" : "Light mode"}
+            {theme === "dark" ? t.settings.dark : t.settings.light}
           </div>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -1484,7 +1910,7 @@ function SettingsApp({ theme, setTheme, wallpaper, setWallpaper }) {
 
       <div>
         <div className="text-[11px] uppercase tracking-wide mb-2.5 flex items-center gap-1.5" style={{ color: "var(--textFaint)" }}>
-          <Palette size={12} /> Wallpaper
+          <Palette size={12} /> {t.settings.wallpaper}
         </div>
         <div className="grid grid-cols-2 gap-3">
           {WALLPAPERS.map((wp, i) => (
@@ -1507,8 +1933,7 @@ function SettingsApp({ theme, setTheme, wallpaper, setWallpaper }) {
       </div>
 
       <div className="text-[11.5px] leading-relaxed" style={{ color: "var(--textFaint)" }}>
-        HamzaOS is a portfolio, not a real operating system — but the windows still drag,
-        the terminal still runs, and nothing here will page anyone at 3am.
+        {t.settings.footer}
       </div>
     </div>
   );
@@ -1550,10 +1975,25 @@ export default function PortfolioOS() {
   const [phase, setPhase] = useState("boot"); // boot -> login -> desktop
   const [theme, setTheme] = useState("dark");
   const [wallpaper, setWallpaper] = useState(0);
+  const [lang, setLang] = useState("en");
   const [bootTime, setBootTime] = useState(null);
   const now = useNow();
   const reducedMotion = usePrefersReducedMotion();
   const isMobile = useIsMobile();
+
+  const t = UI_STRINGS[lang];
+  const content = useMemo(
+    () => ({
+      bio: getBio(lang),
+      skills: getSkills(lang),
+      projects: getProjects(lang),
+      experience: getExperience(lang),
+      education: getEducation(lang),
+      certifications: CERTIFICATIONS,
+    }),
+    [lang]
+  );
+  const langCtxValue = useMemo(() => ({ lang, setLang, t, content }), [lang, t, content]);
 
   const [windows, setWindows] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -1584,8 +2024,8 @@ export default function PortfolioOS() {
   useEffect(() => {
     if (phase === "desktop" && !bootTime) {
       setBootTime(Date.now());
-      pushToast("👋 Welcome to HamzaOS — try opening the Terminal", 2200);
-      pushToast("💡 Right-click the desktop for quick actions", 9000);
+      pushToast(t.toasts.welcome, 2200);
+      pushToast(t.toasts.rightClick, 9000);
     }
   }, [phase, bootTime, pushToast]);
 
@@ -1742,15 +2182,16 @@ export default function PortfolioOS() {
   const wallpaperCss = WALLPAPERS[wallpaper][theme];
 
   const contextItems = [
-    { icon: FilePlus, label: "New Folder", onClick: () => pushToast("📁 New folder created (demo mode)") },
-    { icon: Palette, label: "Change Wallpaper", onClick: () => setWallpaper((w) => (w + 1) % WALLPAPERS.length) },
+    { icon: FilePlus, label: t.contextMenu.newFolder, onClick: () => pushToast(t.toasts.newFolder) },
+    { icon: Palette, label: t.contextMenu.changeWallpaper, onClick: () => setWallpaper((w) => (w + 1) % WALLPAPERS.length) },
     { divider: true },
-    { icon: RefreshCw, label: "Refresh", onClick: () => pushToast("Desktop refreshed") },
+    { icon: RefreshCw, label: t.contextMenu.refresh, onClick: () => pushToast(t.toasts.refreshed) },
   ];
 
   const ctx = { pushToast, openApp, theme, setTheme, wallpaper, setWallpaper };
 
   return (
+    <LangContext.Provider value={langCtxValue}>
     <div
       style={cssVars}
       className="relative w-full h-screen overflow-hidden font-sans antialiased"
@@ -1788,7 +2229,7 @@ export default function PortfolioOS() {
             theme={theme}
             onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")}
             isMobile={isMobile}
-            mobileTitle={mobileAppId ? APP_DEFS[mobileAppId].title : null}
+            mobileTitle={mobileAppId ? t.appTitles[mobileAppId] : null}
             onMobileBack={() => setMobileAppId(null)}
           />
 
@@ -1817,7 +2258,7 @@ export default function PortfolioOS() {
                     >
                       <Icon size={22} style={{ color: "var(--accent)" }} />
                     </div>
-                    <span className="text-[11px]" style={{ color: "var(--text)" }}>{def.title}</span>
+                    <span className="text-[11px]" style={{ color: "var(--text)" }}>{t.appTitles[appId]}</span>
                   </button>
                 );
               })}
@@ -1877,5 +2318,6 @@ export default function PortfolioOS() {
         </div>
       )}
     </div>
+    </LangContext.Provider>
   );
 }
